@@ -1,4 +1,4 @@
-const { projects, clients } = require('../sampleData.js');
+// const { projects, clients } = require('../sampleData.js'); Not needed anymore since we're now using Mongoose models
 
 // Mongoose Models //
 const Project = require('../models/Project');
@@ -9,7 +9,8 @@ const {
     GraphQLID, 
     GraphQLString, 
     GraphQLSchema, 
-    GraphQLList 
+    GraphQLList,
+    GraphQLNonNull
 } = require('graphql');
 
 // Client Type
@@ -72,6 +73,30 @@ const RootQuery = new GraphQLObjectType({
     }
 });
 
+// Mutations //
+const mutation = new GraphQLObjectType({
+    name: 'Mutation',
+    fields: {
+        addClient: {
+            type: ClientType,
+            args: {
+                name: { type: GraphQLNonNull(GraphQLString) },
+                email: { type: GraphQLNonNull(GraphQLString) },
+                phone: { type: GraphQLNonNull(GraphQLString) }
+            },
+            resolve(parentValue, args) {
+                const client = new Client({
+                    name: args.name,
+                    email: args.email,
+                    phone: args.phone
+                });
+                return client.save();
+            }
+        }
+    }
+});
+
 module.exports = new GraphQLSchema({
-    query: RootQuery
+    query: RootQuery,
+    mutation
 });
